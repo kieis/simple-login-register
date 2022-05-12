@@ -4,8 +4,7 @@ const mysql = require('mysql');
 const path = require('path');
 const favicon = require('serve-favicon');
 const bcrypt = require('bcrypt');
-const url = require('url');const generateAccessToken = require('./generateAccessToken');
-;
+const generateAccessToken = require('./generateAccessToken');
 
 const app = express();
 const joinDir = (file) => path.join(__dirname, file);
