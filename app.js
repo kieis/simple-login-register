@@ -57,74 +57,72 @@ app.get('/signup', (req, res) => {
     });
 });
 
+function isValid(text){
+    return (typeof text === typeof "" && text.length > 0);
+}
+
 /*post routes*/
 app.post('/reguser', async (req, res) => {
     const username = req.body.username;
     const email = req.body.email;
+    const password = req.body.password;
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
 
-    db.getConnection(async (error, connection) => {
-        if(error) throw (error);  
+    if(isValid(email) && isValid(username) && isValid(password)) {
+        db.getConnection(async (error, connection) => {
+            if(error) throw (error);  
 
-        const searchQry = mysql.format('SELECT * FROM users WHERE user_name = ? OR user_email = ?', [username, email]);
-        await connection.query(searchQry, async (error, result) => {
-            if((error)) throw (error); 
+            const searchQry = mysql.format('SELECT * FROM users WHERE user_name = ? OR user_email = ?', [username, email]);
+            await connection.query(searchQry, async (error, result) => {
+                if((error)) throw (error); 
 
-            if(result.length > 0) {
-                connection.release();
-                //res.sendStatus(409); //Conflict
-                res.render('./pages/register.ejs', {
-                    pageTitle: 'Sign Up',
-                    attemptReg: "Username or email already used!"
-                });
-            }else{
-                const insertQry = mysql.format('INSERT INTO users VALUES (0,?,?,?)', [username, email, hashedPassword]);
-                await connection.query(insertQry, async (error, result) => {
+                if(result.length > 0) {
                     connection.release();
-                    if(error) throw (error); 
-                    res.sendStatus(201); //Created
-                });
-            }
+                    res.sendStatus(409); //Conflict
+                }else{
+                    const insertQry = mysql.format('INSERT INTO users VALUES (0,?,?,?)', [username, email, hashedPassword]);
+                    await connection.query(insertQry, async (error, result) => {
+                        connection.release();
+                        if(error) throw (error); 
+                        res.sendStatus(201); //Created
+                    });
+                }
+            });
         });
-    });
+    }else {
+        res.sendStatus(406); //Not acceptable
+    }
 });
 
 app.post('/auth', async (req, res) =>{
     const username = req.body.username;
     const password = req.body.password;
 
-    db.getConnection(async (error, connection) =>{
-        if(error) throw(error);
-
-        const searchQry = mysql.format('SELECT user_pass FROM users WHERE user_name = ? OR user_email = ?', [username, username]);
-        await connection.query(searchQry, async (error, result) => {
+    if(isValid(username) && isValid(username)) {
+        db.getConnection(async (error, connection) => {
             if(error) throw(error);
-            if(result.length > 0) {
-                connection.release();
-                const hashedPassword = result[0].user_pass;
-                if(await bcrypt.compare(password, hashedPassword)) {
-                    //res.sendStatus(200); //OK
-                    const token = generateAccessToken({user: username});
-                    res.json({ accessToken: token });
-                }else{
-                    //res.sendStatus(401); //Unauthorized
-                    res.render('./pages/login.ejs', {
-                        pageTitle: 'Sign In',
-                        attemptLogin: "Incorrect Password!"
-                    });
+
+            const searchQry = mysql.format('SELECT user_pass FROM users WHERE user_name = ? OR user_email = ?', [username, username]);
+            await connection.query(searchQry, async (error, result) => {
+                if(error) throw(error);
+                if(result.length > 0) {
+                    connection.release();
+                    const hashedPassword = result[0].user_pass;
+                    if(await bcrypt.compare(password, hashedPassword)) {
+                        res.sendStatus(200); //OK
+                        //const token = generateAccessToken({user: username});
+                    }else{
+                        res.sendStatus(401); //Unauthorized
+                    }
+                } else{
+                    connection.release();
+                    res.sendStatus(404); //Not found
                 }
-            } else{
-                connection.release();
-                //res.sendStatus(404); //Not found
-                //const error = encodeURIComponent("username or email doesn't exist");
-                //res.redirect('/login?attemptLogin=' + error);
-                res.render('./pages/login.ejs', {
-                    pageTitle: 'Sign In',
-                    attemptLogin: "Username or email doesn't exist!"
-                });
-            }
+            });
         });
-    });
+    }else {
+        res.sendStatus(401); //Unauthorized
+    }
 });
 
 /*port*/

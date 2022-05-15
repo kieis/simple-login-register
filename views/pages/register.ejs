@@ -17,24 +17,25 @@
                     <h4 class="mt-1 mb-5 pb-1">Create Account</h4>
                   </div>
   
-                  <form action="/reguser" method="post">
-                    <p style="color: red"><%= typeof attemptReg === 'undefined' ? '' : attemptReg %></p>
+                  <form action="javascript:register()" method="post">
+                    <p style="color: red" id="formError"></p>
   
                     <div class="form-outline mb-4">
-                      <label class="form-label" for="form2Example11">Username</label>
-                      <input type="text" name="username" id="form2Example11" class="form-control"
-                        placeholder="Enter a username" />                
+                      <label class="form-label" for="formUsername">Username</label>
+                      <input type="text" name="username" id="formUsername" class="form-control"
+                        placeholder="Enter a username" minlength="8" required="required" />                
                     </div>
 
                     <div class="form-outline mb-4">
-                        <label class="form-label" for="form2Example11">Email</label>
-                        <input type="text" name="email" id="form2Example11" class="form-control"
-                          placeholder="Enter a email address" />   
+                        <label class="form-label" for="formEmail">Email</label>
+                        <input type="email" name="email" id="formEmail" class="form-control"
+                          placeholder="Enter a email address" required="required" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$"/>   
                       </div>
   
                     <div class="form-outline mb-4">
-                      <label class="form-label" for="form2Example22">Password</label>
-                      <input type="password" name="password" id="form2Example22" class="form-control" />             
+                      <label class="form-label" for="formPassword">Password</label>
+                      <input type="password" name="password" id="formPassword" class="form-control" 
+                      minlength="8" required="required"/>             
                     </div>
   
                     <div class="text-center pt-1 mb-5 pb-1">
