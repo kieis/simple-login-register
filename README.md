@@ -12,7 +12,7 @@ Simple system login made with NodeJS
 ## Installation
 
 ```bash
-$ git clone https://github.com/kieis/crypto-currency
+$ git clone https://github.com/kieis/simple-login-register
 ```
 ```
 npm install
